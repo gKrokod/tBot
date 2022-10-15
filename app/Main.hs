@@ -12,59 +12,72 @@ import qualified Data.Text.Encoding as E (encodeUtf8)
 import qualified Data.ByteString.Lazy.Char8 as LC
 import qualified Data.ByteString.Lazy as L
 -- import qualified Data.Text.IO as T
+import Data.Function ((&))
 
-buildSendRequest :: TParse -> Request
-buildSendRequest user =
-    setRequestHost botHost
-  $ setRequestMethod "GET" 
-  $ setRequestSecure True
-  $ setRequestQueryString ([("chat_id", (Just . BC.pack . show . tChatID) user), queryMsg $ tMessage user ])
-  $ setRequestPath (mconcat[apiPath, myToken, either (\_ -> "/sendMessage") (\_ -> "/sendAnimation") (tMessage user)])
-  $ setRequestPort 443
+buildSendRequest :: Config -> TParse -> Request
+buildSendRequest cfg user =
+    setRequestHost (cfg & cBotHost)
+  $ setRequestMethod (cfg & cMethod)
+  $ setRequestSecure (cfg & cSecure)
+  $ setRequestQueryString ([("chat_id", user & Just . BC.pack . show . tChatID ), queryMsg $ user & tMessage ])
+  $ setRequestPath (mconcat[cfg & cApiPath, cfg & cToken, either (\_ -> "/sendMessage") (\_ -> "/sendAnimation") (user & tMessage) ])
+  $ setRequestPort (cfg & cPort)
   $ defaultRequest
     where queryMsg (Left msg) = ("text", Just $ E.encodeUtf8 msg)
           queryMsg (Right msg) = ("animation", Just $ E.encodeUtf8 msg)
 
-buildGetRequest :: Request
-buildGetRequest =
-    setRequestHost botHost
-  $ setRequestMethod "GET" 
-  $ setRequestSecure True
-  $ setRequestQueryString ([("offset", myOffset), ("timeout", myTimeOut)])
-  $ setRequestPath (mconcat[apiPath, myToken, "/getUpdates"])
-  $ setRequestPort 443
+buildGetRequest :: Config -> Request
+buildGetRequest cfg =
+    setRequestHost (cfg & cBotHost)
+  $ setRequestMethod (cfg & cMethod) 
+  $ setRequestSecure (cfg & cSecure)
+  $ setRequestQueryString ([("offset", Just $ cfg & cOffset), ("timeout", Just $ cfg & cTimeOut)])
+  $ setRequestPath (mconcat[cfg & cApiPath, cfg & cToken, "/getUpdates"])
+  $ setRequestPort (cfg & cPort)
   $ defaultRequest
 
-loop :: UpdateID -> IO()
-loop updateID = do
-  response <- httpLBS buildGetRequest 
+makeResponse :: Config -> TParse -> TParse
+makeResponse cfg user = case user & tMessage of
+  Left "/help" -> user {tMessage = Left $ cfg & cTextMenuHelp}
+  Left "/repeat" -> user {tMessage = Left $ cfg & cTextMenuRepeat}
+  Left msg -> user
+  Right msg -> user
+-- Dopisat' tyt konady repeat, pochitat pro knopki i menu. K tomy ze zdes nado peredavat kolichestvo povtorov
+
+loop :: Config -> UpdateID -> IO()
+loop cfg updateID = do
+  response <- httpLBS $ buildGetRequest cfg 
   putStrLn $ "Get . The status code was: " ++
        show (getResponseStatusCode response)
   print $ getResponseHeader "Content-Type" response
   let jsonBody = getResponseBody (response)
   -- LC.putStrLn $ jsonBody
   -- L.writeFile "data.json" jsonBody
-  let result = decode jsonBody :: Maybe TParse
+  let mbMessage = decode jsonBody :: Maybe TParse
 
-  case result of
+  case mbMessage of
     Nothing -> do
        putStrLn "JSON is uncorrect"
        LC.putStrLn $ jsonBody
        L.writeFile "data.json" jsonBody
-       loop updateID
-    Just answer -> do
-      putStrLn $ show answer
-      let updateID' = tUpdateID answer
-      if updateID == updateID' then loop updateID'
+       loop cfg updateID
+    Just message -> do
+      putStrLn $ show message
+      let updateID' = message & tUpdateID 
+      if updateID == updateID' then loop cfg updateID'
       else do
-        response <- httpLBS (buildSendRequest answer) -- urlUpdate
+        botResponse <- httpLBS (buildSendRequest cfg $ makeResponse cfg message) -- urlUpdate
         putStrLn $ "After SEnd The status code was: " ++
-           show (getResponseStatusCode response)
-        print $ getResponseHeader "Content-Type" response
-        LC.putStrLn $ getResponseBody response
-        loop updateID'
+          show (getResponseStatusCode botResponse)
+        print $ getResponseHeader "Content-Type" botResponse
+        LC.putStrLn $ getResponseBody botResponse
+        loop cfg updateID'
 
 
 
 main :: IO ()
-main = loop 0 
+main = do
+  mConfig <- loadConfig
+  if (mConfig & cMode) == TelegramBot
+  then loop mConfig 0 -- if id message don't change then ask again else answer 
+  else putStrLn "No console Bot man"

@@ -43,6 +43,7 @@ library:
   - bytestring
   - aeson
   - text
+  - configurator
       
 executables:
   bothttp-exe:
