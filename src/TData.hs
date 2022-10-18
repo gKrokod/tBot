@@ -61,17 +61,6 @@ instance FromJSON TParse where
                     , tMessage  = message 
                     }
 
--- myTimeOut :: Maybe BC.ByteString
--- myTimeOut = Just "5"
---
--- myOffset :: Maybe BC.ByteString
--- myOffset = Just "-1" -- Take the last message
-
--- botHost :: BC.ByteString
--- botHost = "api.telegram.org"
-
--- apiPath :: BC.ByteString
--- apiPath = "/bot"
 
 lookUpConfig :: ConfigKey -> IO T.Text
 lookUpConfig key = do
@@ -108,5 +97,3 @@ loadConfig = do
 		  , cMode = bool ConsoleBot TelegramBot mode
 		  }
 
--- myHelp :: T.Text
--- myHelp = "Welcome! I am console echo-bot.\nPossible command : /help, /repeat\nWHat about me? Good to meet you!"

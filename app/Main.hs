@@ -1,7 +1,7 @@
 module Main (main) where
-import Lib
 -- import Data.Either --fromLeft
 import TData
+import qualified ConsoleBot (loop, greeting)
 -- import Control.Concurrent
 import Network.HTTP.Simple --(parseRequest, Request, httpLBS, getResponseBody, getResponseStatusCode, getResponseHeader)
 import Data.Aeson (decode)
@@ -80,4 +80,4 @@ main = do
   mConfig <- loadConfig
   if (mConfig & cMode) == TelegramBot
   then loop mConfig 0 -- if id message don't change then ask again else answer 
-  else putStrLn "No console Bot man"
+  else ConsoleBot.greeting mConfig >> ConsoleBot.loop (mConfig & cRepeatCount)
