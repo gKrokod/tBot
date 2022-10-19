@@ -80,4 +80,4 @@ main = do
   mConfig <- loadConfig
   if (mConfig & cMode) == TelegramBot
   then loop mConfig 0 -- if id message don't change then ask again else answer 
-  else ConsoleBot.greeting mConfig >> ConsoleBot.loop (mConfig & cRepeatCount)
+  else ConsoleBot.greeting mConfig
