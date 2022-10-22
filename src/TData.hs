@@ -6,6 +6,8 @@ import qualified Data.Text.Encoding as E (encodeUtf8)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.Configurator as C
 import Data.Bool (bool)
+import GHC.Generics
+import qualified Data.ByteString.Lazy as L
 
 type Gif = T.Text
 type Message = T.Text
@@ -20,6 +22,7 @@ data TParse = TParse
     tUpdateID :: UpdateID
  ,  tChatID :: ChatID
  ,  tMessage :: Either Message Gif
+ ,  keyboardMenu :: Maybe BC.ByteString
  } deriving Show
 
 data Config = Config
@@ -59,6 +62,7 @@ instance FromJSON TParse where
                       tUpdateID = updateId
                     , tChatID   = chatId 
                     , tMessage  = message 
+		    , keyboardMenu = Nothing -- default Nothing
                     }
 
 
@@ -97,3 +101,28 @@ loadConfig = do
 		  , cMode = bool ConsoleBot TelegramBot mode
 		  }
 
+data Keyboard = Keyboard {
+                  keyboard :: [[Button]]	        
+                , resize_keyboard :: Bool
+		, one_time_keyboard :: Bool
+                } deriving (Show, Generic)
+data Button = Button {
+                text :: T.Text
+              } deriving (Show, Generic)
+
+instance ToJSON Keyboard
+instance ToJSON Button
+
+menuForRepeatCount :: Keyboard
+menuForRepeatCount = Keyboard { keyboard = [[Button {text = "1"}
+                             , Button {text = "2"}
+			     , Button {text = "3"}
+			     , Button {text = "4"}
+			     , Button {text = "5"}
+			     ]]
+		, resize_keyboard = True
+		, one_time_keyboard = True
+	        }
+
+justKeyboard :: Maybe BC.ByteString
+justKeyboard = Just $ L.toStrict $ encode menuForRepeatCount 
