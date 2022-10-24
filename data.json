@@ -1,2 +1,63 @@
-{"ok":true,"result":[{"update_id":240949879,
-"message":{"message_id":801,"from":{"id":5746210503,"is_bot":false,"first_name":"\u0415","last_name":"\u041d","language_code":"ru"},"chat":{"id":5746210503,"first_name":"\u0415","last_name":"\u041d","type":"private"},"date":1666619638,"photo":[{"file_id":"AgACAgIAAxkBAAIDIWNWmPZOymfzwfkLX-gnrCZl9twxAAKCvjEbPDG5SiLEp--2wDGuAQADAgADcwADKgQ","file_unique_id":"AQADgr4xGzwxuUp4","file_size":1514,"width":90,"height":51},{"file_id":"AgACAgIAAxkBAAIDIWNWmPZOymfzwfkLX-gnrCZl9twxAAKCvjEbPDG5SiLEp--2wDGuAQADAgADbQADKgQ","file_unique_id":"AQADgr4xGzwxuUpy","file_size":24341,"width":320,"height":180},{"file_id":"AgACAgIAAxkBAAIDIWNWmPZOymfzwfkLX-gnrCZl9twxAAKCvjEbPDG5SiLEp--2wDGuAQADAgADeAADKgQ","file_unique_id":"AQADgr4xGzwxuUp9","file_size":104195,"width":800,"height":451},{"file_id":"AgACAgIAAxkBAAIDIWNWmPZOymfzwfkLX-gnrCZl9twxAAKCvjEbPDG5SiLEp--2wDGuAQADAgADeQADKgQ","file_unique_id":"AQADgr4xGzwxuUp-","file_size":113350,"width":1136,"height":640}]}}]}
+{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 240949931,
+      "callback_query": {
+        "id": "6233042113102980802",
+        "from": {
+          "id": 5746210503,
+          "is_bot": false,
+          "first_name": "Е",
+          "last_name": "Н",
+          "language_code": "en"
+        },
+        "message": {
+          "message_id": 952,
+          "from": {
+            "id": 5703519544,
+            "is_bot": true,
+            "first_name": "djinbot",
+            "username": "DjinRuBot"
+          },
+          "chat": {
+            "id": 5746210503,
+            "first_name": "Е",
+            "last_name": "Н",
+            "type": "private"
+          },
+          "date": 1666622540,
+          "text": "Number of repeat =",
+          "reply_markup": {
+            "inline_keyboard": [
+              [
+                {
+                  "text": "1",
+                  "callback_data": "1!!!!!!!!!!!!!"
+                },
+                {
+                  "text": "2",
+                  "callback_data": "2!!!!!!!!!!!!!"
+                },
+                {
+                  "text": "3",
+                  "callback_data": "3!!!!!!!!!!!!!"
+                },
+                {
+                  "text": "4",
+                  "callback_data": "4!!!!!!!!!!!!!"
+                },
+                {
+                  "text": "5",
+                  "callback_data": "5!!!!!!!!!!!!!"
+                }
+              ]
+            ]
+          }
+        },
+        "chat_instance": "6648060356689741275",
+        "data": "5!!!!!!!!!!!!!"
+      }
+    }
+  ]
+}

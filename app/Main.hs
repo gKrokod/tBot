@@ -70,7 +70,8 @@ loop cfg updateID = do
       let updateID' = message & tUpdateID 
       if updateID == updateID' then loop cfg updateID'
       else do
-        let echoMessage = replicate (fromIntegral $ cfg & cRepeatCount) (buildSendRequest cfg $ makeResponse cfg message)
+        -- let echoMessage = replicate (fromIntegral $ cfg & cRepeatCount) (buildSendRequest cfg $ makeResponse cfg message)
+        let echoMessage = replicate 1 (buildSendRequest cfg $ makeResponse cfg message)
         botResponse' <- mapM httpLBS echoMessage
 	let botResponse = head botResponse' -- опасное место с функцией head. будет ли у нас всегда не пустой список здесь?
         putStrLn $ "After SEnd The status code was: " ++
