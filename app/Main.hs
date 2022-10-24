@@ -44,7 +44,9 @@ makeResponse cfg user = case user & tMessage of
   Left msg -> user
   Right msg -> user
 -- Dopisat' tyt konady repeat, pochitat pro knopki i menu. K tomy ze zdes nado peredavat kolichestvo povtorov
-
+-- добавить в параметры базу данных пользователей, из мейна давать пустой дата мап, а в программе добавлять
+-- новых пользователей по айди, если не найден юзер такой.
+-- loop :: UserBase -> Config -> UpdateID -> IO ()
 loop :: Config -> UpdateID -> IO()
 loop cfg updateID = do
   response <- httpLBS $ buildGetRequest cfg 
@@ -67,7 +69,9 @@ loop cfg updateID = do
       let updateID' = message & tUpdateID 
       if updateID == updateID' then loop cfg updateID'
       else do
-        botResponse <- httpLBS (buildSendRequest cfg $ makeResponse cfg message) -- urlUpdate
+        let echoMessage = replicate (fromIntegral $ cfg & cRepeatCount) (buildSendRequest cfg $ makeResponse cfg message)
+        botResponse' <- mapM httpLBS echoMessage
+	let botResponse = head botResponse' -- опасное место с функцией head. будет ли у нас всегда не пустой список здесь?
         putStrLn $ "After SEnd The status code was: " ++
           show (getResponseStatusCode botResponse)
         print $ getResponseHeader "Content-Type" botResponse
