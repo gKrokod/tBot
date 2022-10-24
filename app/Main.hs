@@ -30,6 +30,7 @@ buildSendRequest cfg user =
     setRequestHost (cfg & cBotHost)
   $ setRequestMethod (cfg & cMethod)
   $ setRequestSecure (cfg & cSecure)
+  -- $ setRequestQueryString ([("chat_id", user & Just . BC.pack . show . tChatID ), queryMsg $ user & tMessage, ("reply_markup", user & keyboardMenu)  ])
   $ setRequestQueryString ([("chat_id", user & Just . BC.pack . show . tChatID ), queryMsg $ user & tMessage, ("reply_markup", user & keyboardMenu)  ])
   $ setRequestPath (mconcat[cfg & cApiPath, cfg & cToken, either (\_ -> "/sendMessage") (\_ -> "/sendAnimation") (user & tMessage) ])
   $ setRequestPort (cfg & cPort)
