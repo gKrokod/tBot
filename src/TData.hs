@@ -14,6 +14,8 @@ type Message = T.Text
 type ConfigKey = T.Text
 type ChatID = Integer
 type UpdateID = Integer
+type DataFromButton = Integer
+type QueryID = T.Text
 
 data Mode = ConsoleBot | TelegramBot deriving (Show, Eq)
 
@@ -23,6 +25,14 @@ data TParse = TParse
  ,  tChatID :: ChatID
  ,  tMessage :: Either Message Gif
  ,  keyboardMenu :: Maybe BC.ByteString
+ } deriving Show
+
+data TParseQuery = TParseQuery 
+ {
+   qUpdateID :: UpdateID
+ , qChatID :: ChatID
+ , qQueryID :: QueryID
+ , qDataFromButton :: DataFromButton
  } deriving Show
 
 data Config = Config
@@ -40,7 +50,27 @@ data Config = Config
  ,  cSecure :: Bool
  ,  cMode :: Mode
  } deriving Show
-
+instance FromJSON TParseQuery where
+  parseJSON (Object v) = do
+    updateId   <- v .: "result"
+                    >>= \r -> Prelude.head r .: "update_id"
+    chatId     <- v .: "result" 
+                    >>= \r -> Prelude.head r .: "callback_query" 
+                    >>= (.: "message")  
+                    >>= (.: "chat")  
+                    >>= (.: "id")  
+    dataButton <- v .: "result"
+                    >>= \r -> Prelude.head r .: "callback_query"
+                    >>= (.: "data")
+    queryId <- v .: "result"
+                    >>= \r -> Prelude.head r .: "callback_query"
+                    >>= (.: "id")
+    return  TParseQuery {
+                           qUpdateID = updateId
+                         , qChatID   = chatId 
+	                 , qDataFromButton = read $ T.unpack dataButton
+			 , qQueryID = queryId
+		         }
 instance FromJSON TParse where
   parseJSON (Object v) = do
     updateId <- v .: "result" 
@@ -58,7 +88,7 @@ instance FromJSON TParse where
                           >>= (.: "file_id") 
                           >>= \gif -> return $ Right gif
  
-    return $ TParse { 
+    return   TParse { 
                       tUpdateID = updateId
                     , tChatID   = chatId 
                     , tMessage  = message 
@@ -86,7 +116,7 @@ loadConfig = do
   method <- C.lookupDefault "NotFoundMethod.cfg" conf ("config.url.method")
   secure <- C.lookupDefault False conf ("config.url.secure") -- сделать здесь строку вида "False" для единообразия?
   mode <- C.lookupDefault False conf ("config.telegrammode") -- сделать здесь строку вида "False" для единообразия
-  return $ Config { 
+  return   Config { 
                     cRepeatCount = read $ T.unpack rcount 
                   , cTextMenuHelp = helpmenu
 		  , cTextMenuRepeat = repeatmenu
@@ -129,11 +159,11 @@ menuForRepeatCount :: Keyboard
 -- 		, resize_keyboard = True
 -- 		, one_time_keyboard = True
 -- 	        }
-menuForRepeatCount = Keyboard { inline_keyboard = [[Button {text = "1", callback_data = "1!!!!!!!!!!!!!"}
-                             , Button {text = "2", callback_data = "2!!!!!!!!!!!!!"}
-			     , Button {text = "3", callback_data = "3!!!!!!!!!!!!!"}
-			     , Button {text = "4", callback_data = "4!!!!!!!!!!!!!"}
-			     , Button {text = "5", callback_data = "5!!!!!!!!!!!!!"}
+menuForRepeatCount = Keyboard { inline_keyboard = [[Button {text = "1", callback_data = "1"}
+                             , Button {text = "2", callback_data = "2"}
+			     , Button {text = "3", callback_data = "3"}
+			     , Button {text = "4", callback_data = "4"}
+			     , Button {text = "5", callback_data = "5"}
 			     ]]
 		-- , resize_keyboard = True
 		-- , one_time_keyboard = True

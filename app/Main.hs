@@ -48,6 +48,15 @@ makeResponse cfg user = case user & tMessage of
 -- добавить в параметры базу данных пользователей, из мейна давать пустой дата мап, а в программе добавлять
 -- новых пользователей по айди, если не найден юзер такой.
 -- loop :: UserBase -> Config -> UpdateID -> IO ()
+buildQ :: Config -> QueryID -> Request
+buildQ cfg q =
+    setRequestHost (cfg & cBotHost)
+  $ setRequestMethod (cfg & cMethod) 
+  $ setRequestSecure (cfg & cSecure)
+  $ setRequestQueryString ([("callback_query_id", Just $ E.encodeUtf8 $ q), ("text", Just "Your answer is saved"), ("show_alert", Just $ "false")])
+  $ setRequestPath (mconcat[cfg & cApiPath, cfg & cToken, "/answerCallbackQuery"])
+  $ setRequestPort (cfg & cPort)
+  $ defaultRequest
 loop :: Config -> UpdateID -> IO()
 loop cfg updateID = do
   response <- httpLBS $ buildGetRequest cfg 
@@ -58,20 +67,36 @@ loop cfg updateID = do
   -- LC.putStrLn $ jsonBody
   -- L.writeFile "data.json" jsonBody
   let mbMessage = decode jsonBody :: Maybe TParse
-
-  case mbMessage of
+  case mbMessage of -- Maybe there is a message?
     Nothing -> do
-       putStrLn "JSON is uncorrect"
-       LC.putStrLn $ jsonBody
-       L.writeFile "data.json" jsonBody
-       loop cfg updateID
+       let mbQuery = decode jsonBody :: Maybe TParseQuery
+       case mbQuery of -- Maybe there is a query (from Button)?
+         Nothing -> do
+           putStrLn "JSON is uncorrect"
+           LC.putStrLn $ jsonBody
+           L.writeFile "data.json" jsonBody
+           loop cfg updateID
+	 Just query -> do
+	   putStrLn $ show query
+	   let updateID' = query & qUpdateID 
+	   if updateID == updateID' then loop cfg updateID'
+	   else do
+	     -- Здесь надо послать сообщение, что новое число повторов установлено и закрыть клавиатуру
+	     print $ "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! query ID"
+	     print $ query & qQueryID
+  	     response <- httpLBS $ buildQ cfg (query & qQueryID)
+	     putStrLn $ "Get . The status code was: " ++
+		 show (getResponseStatusCode response)
+	     print $ getResponseHeader "Content-Type" response
+	     loop (cfg {cRepeatCount = query & qDataFromButton}) updateID' -- в конфиге ставим новое значение повторов
+
     Just message -> do
       putStrLn $ show message
       let updateID' = message & tUpdateID 
       if updateID == updateID' then loop cfg updateID'
       else do
-        -- let echoMessage = replicate (fromIntegral $ cfg & cRepeatCount) (buildSendRequest cfg $ makeResponse cfg message)
-        let echoMessage = replicate 1 (buildSendRequest cfg $ makeResponse cfg message)
+        let echoMessage = replicate (fromIntegral $ cfg & cRepeatCount) (buildSendRequest cfg $ makeResponse cfg message)
+        -- let echoMessage = replicate 1 (buildSendRequest cfg $ makeResponse cfg message)
         botResponse' <- mapM httpLBS echoMessage
 	let botResponse = head botResponse' -- опасное место с функцией head. будет ли у нас всегда не пустой список здесь?
         putStrLn $ "After SEnd The status code was: " ++
