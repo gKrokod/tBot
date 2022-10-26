@@ -31,7 +31,7 @@ version = Version [0,1,0,0] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "/home/w/projects/git/tBot/.stack-work/install/x86_64-linux/f73eb4554bca2dc4152cef32c3087104cd11b38475ed2068678f59ce79e1444a/9.0.2/bin"
-libdir     = "/home/w/projects/git/tBot/.stack-work/install/x86_64-linux/f73eb4554bca2dc4152cef32c3087104cd11b38475ed2068678f59ce79e1444a/9.0.2/lib/x86_64-linux-ghc-9.0.2/bothttp-0.1.0.0-8CP1B7xD0JK2uuIfS7ooQb"
+libdir     = "/home/w/projects/git/tBot/.stack-work/install/x86_64-linux/f73eb4554bca2dc4152cef32c3087104cd11b38475ed2068678f59ce79e1444a/9.0.2/lib/x86_64-linux-ghc-9.0.2/bothttp-0.1.0.0-GktIULCjtJN2z6Izimivph"
 dynlibdir  = "/home/w/projects/git/tBot/.stack-work/install/x86_64-linux/f73eb4554bca2dc4152cef32c3087104cd11b38475ed2068678f59ce79e1444a/9.0.2/lib/x86_64-linux-ghc-9.0.2"
 datadir    = "/home/w/projects/git/tBot/.stack-work/install/x86_64-linux/f73eb4554bca2dc4152cef32c3087104cd11b38475ed2068678f59ce79e1444a/9.0.2/share/x86_64-linux-ghc-9.0.2/bothttp-0.1.0.0"
 libexecdir = "/home/w/projects/git/tBot/.stack-work/install/x86_64-linux/f73eb4554bca2dc4152cef32c3087104cd11b38475ed2068678f59ce79e1444a/9.0.2/libexec/x86_64-linux-ghc-9.0.2/bothttp-0.1.0.0"

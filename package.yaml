@@ -44,6 +44,7 @@ library:
   - aeson
   - text
   - configurator
+  - http-conduit
       
 executables:
   bothttp-exe:
@@ -57,8 +58,9 @@ executables:
     - bothttp
     - bytestring
     - aeson
-    - text
+    # - text
     - http-conduit
+    - containers
 
 tests:
   bothttp-test:

@@ -21,7 +21,6 @@ buildSendRequest cfg user =
     setRequestHost (cfg & cBotHost)
   $ setRequestMethod (cfg & cMethod)
   $ setRequestSecure (cfg & cSecure)
-  -- $ setRequestQueryString ([("chat_id", user & Just . BC.pack . show . tChatID ), queryMsg $ user & tMessage, ("reply_markup", user & keyboardMenu)  ])
   $ setRequestQueryString ([("chat_id", user & Just . BC.pack . show . tChatID ), queryMsg $ user & tMessage, ("reply_markup", user & keyboardMenu)  ])
   $ setRequestPath (mconcat[cfg & cApiPath, cfg & cToken, either (\_ -> "/sendMessage") (\_ -> "/sendAnimation") (user & tMessage) ])
   $ setRequestPort (cfg & cPort)
@@ -35,10 +34,6 @@ makeResponse cfg user = case user & tMessage of
   Left "/repeat" -> user {tMessage = Left $ cfg & cTextMenuRepeat, keyboardMenu = justKeyBoard, isCommand = True}
   Left msg -> user
   Right msg -> user
--- Dopisat' tyt konady repeat, pochitat pro knopki i menu. K tomy ze zdes nado peredavat kolichestvo povtorov
--- добавить в параметры базу данных пользователей, из мейна давать пустой дата мап, а в программе добавлять
--- новых пользователей по айди, если не найден юзер такой.
--- loop :: UserBase -> Config -> UpdateID -> IO ()
 buildCallBackQuery :: Config -> QueryID -> Request
 buildCallBackQuery cfg q =
     setRequestHost (cfg & cBotHost)

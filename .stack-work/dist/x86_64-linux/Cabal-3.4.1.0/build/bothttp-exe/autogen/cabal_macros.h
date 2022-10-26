@@ -50,6 +50,16 @@
   (major1) == 0 && (major2) <  10 || \
   (major1) == 0 && (major2) == 10 && (minor) <= 12)
 #endif /* MIN_VERSION_bytestring */
+/* package containers-0.6.4.1 */
+#ifndef VERSION_containers
+#define VERSION_containers "0.6.4.1"
+#endif /* VERSION_containers */
+#ifndef MIN_VERSION_containers
+#define MIN_VERSION_containers(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  6 || \
+  (major1) == 0 && (major2) == 6 && (minor) <= 4)
+#endif /* MIN_VERSION_containers */
 /* package http-conduit-2.3.8 */
 #ifndef VERSION_http_conduit
 #define VERSION_http_conduit "2.3.8"
@@ -60,16 +70,6 @@
   (major1) == 2 && (major2) <  3 || \
   (major1) == 2 && (major2) == 3 && (minor) <= 8)
 #endif /* MIN_VERSION_http_conduit */
-/* package text-1.2.5.0 */
-#ifndef VERSION_text
-#define VERSION_text "1.2.5.0"
-#endif /* VERSION_text */
-#ifndef MIN_VERSION_text
-#define MIN_VERSION_text(major1,major2,minor) (\
-  (major1) <  1 || \
-  (major1) == 1 && (major2) <  2 || \
-  (major1) == 1 && (major2) == 2 && (minor) <= 5)
-#endif /* MIN_VERSION_text */
 
 /* tool gcc-9 */
 #ifndef TOOL_VERSION_gcc
@@ -163,7 +163,7 @@
 #endif /* MIN_TOOL_VERSION_strip */
 
 #ifndef CURRENT_COMPONENT_ID
-#define CURRENT_COMPONENT_ID "bothttp-0.1.0.0-JkvNa7SVgfWCX52XP2fEa5-bothttp-exe"
+#define CURRENT_COMPONENT_ID "bothttp-0.1.0.0-C7Zgrhxu2S03syK9la6v7c-bothttp-exe"
 #endif /* CURRENT_COMPONENT_ID */
 #ifndef CURRENT_PACKAGE_VERSION
 #define CURRENT_PACKAGE_VERSION "0.1.0.0"

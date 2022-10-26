@@ -11,6 +11,7 @@ type ChatID = Integer
 type UpdateID = Integer
 type DataFromButton = Integer
 type QueryID = T.Text
+type RepeatCount = Integer
 
 data Mode = ConsoleBot | TelegramBot deriving (Show, Eq)
 
@@ -33,7 +34,7 @@ data TParseQuery = TParseQuery
 
 data Config = Config
  {
-    cRepeatCount :: Integer
+    cRepeatCount :: RepeatCount
  ,  cTextMenuHelp :: T.Text  -- check for Russian words
  ,  cTextMenuRepeat :: T.Text -- check for Russian words
  ,  cApiPath :: BC.ByteString
