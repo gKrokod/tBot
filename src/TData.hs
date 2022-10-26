@@ -25,6 +25,7 @@ data TParse = TParse
  ,  tChatID :: ChatID
  ,  tMessage :: Either Message Gif
  ,  keyboardMenu :: Maybe BC.ByteString
+ ,  isCommand :: Bool
  } deriving Show
 
 data TParseQuery = TParseQuery 
@@ -93,6 +94,7 @@ instance FromJSON TParse where
                     , tChatID   = chatId 
                     , tMessage  = message 
 		    , keyboardMenu = Nothing -- default Nothing
+		    , isCommand = False -- default
                     }
 
 
@@ -133,14 +135,7 @@ loadConfig = do
 
 data Keyboard = Keyboard {
                   inline_keyboard :: [[Button]]	        
-                -- , resize_keyboard :: Bool
-		-- , one_time_keyboard :: Bool
                 } deriving (Show, Generic)
--- data Keyboard = Keyboard {
---                   keyboard :: [[Button]]	        
---                 , resize_keyboard :: Bool
--- 		, one_time_keyboard :: Bool
---                 } deriving (Show, Generic)
 data Button = Button {
                 text :: T.Text
 	      , callback_data :: T.Text	
@@ -150,23 +145,12 @@ instance ToJSON Keyboard
 instance ToJSON Button
 
 menuForRepeatCount :: Keyboard
--- menuForRepeatCount = Keyboard { keyboard = [[Button {text = "1"}
---                              , Button {text = "2"}
--- 			     , Button {text = "3"}
--- 			     , Button {text = "4"}
--- 			     , Button {text = "5"}
--- 			     ]]
--- 		, resize_keyboard = True
--- 		, one_time_keyboard = True
--- 	        }
 menuForRepeatCount = Keyboard { inline_keyboard = [[Button {text = "1", callback_data = "1"}
                              , Button {text = "2", callback_data = "2"}
 			     , Button {text = "3", callback_data = "3"}
 			     , Button {text = "4", callback_data = "4"}
 			     , Button {text = "5", callback_data = "5"}
 			     ]]
-		-- , resize_keyboard = True
-		-- , one_time_keyboard = True
 	        }
 
 justKeyboard :: Maybe BC.ByteString

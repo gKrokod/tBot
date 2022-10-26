@@ -14,6 +14,7 @@ import qualified Data.ByteString.Lazy.Char8 as LC
 import qualified Data.ByteString.Lazy as L
 -- import qualified Data.Text.IO as T
 import Data.Function ((&))
+import Data.Bool (bool)
 
 buildGetRequest :: Config -> Request
 buildGetRequest cfg =
@@ -40,16 +41,16 @@ buildSendRequest cfg user =
 
 makeResponse :: Config -> TParse -> TParse
 makeResponse cfg user = case user & tMessage of
-  Left "/help" -> user {tMessage = Left $ cfg & cTextMenuHelp}
-  Left "/repeat" -> user {tMessage = Left $ cfg & cTextMenuRepeat, keyboardMenu = justKeyboard}
+  Left "/help" -> user {tMessage = Left $ cfg & cTextMenuHelp, isCommand = True}
+  Left "/repeat" -> user {tMessage = Left $ cfg & cTextMenuRepeat, keyboardMenu = justKeyboard, isCommand = True}
   Left msg -> user
   Right msg -> user
 -- Dopisat' tyt konady repeat, pochitat pro knopki i menu. K tomy ze zdes nado peredavat kolichestvo povtorov
 -- добавить в параметры базу данных пользователей, из мейна давать пустой дата мап, а в программе добавлять
 -- новых пользователей по айди, если не найден юзер такой.
 -- loop :: UserBase -> Config -> UpdateID -> IO ()
-buildQ :: Config -> QueryID -> Request
-buildQ cfg q =
+buildCallBackQuery :: Config -> QueryID -> Request
+buildCallBackQuery cfg q =
     setRequestHost (cfg & cBotHost)
   $ setRequestMethod (cfg & cMethod) 
   $ setRequestSecure (cfg & cSecure)
@@ -81,13 +82,10 @@ loop cfg updateID = do
 	   let updateID' = query & qUpdateID 
 	   if updateID == updateID' then loop cfg updateID'
 	   else do
-	     -- Здесь надо послать сообщение, что новое число повторов установлено и закрыть клавиатуру
-	     print $ "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! query ID"
-	     print $ query & qQueryID
-  	     response <- httpLBS $ buildQ cfg (query & qQueryID)
-	     putStrLn $ "Get . The status code was: " ++
-		 show (getResponseStatusCode response)
-	     print $ getResponseHeader "Content-Type" response
+  	     response <- httpLBS $ buildCallBackQuery cfg (query & qQueryID)
+	     -- putStrLn $ "Get . The status code was: " ++
+		--  show (getResponseStatusCode response)
+	     -- print $ getResponseHeader "Content-Type" response
 	     loop (cfg {cRepeatCount = query & qDataFromButton}) updateID' -- в конфиге ставим новое значение повторов
 
     Just message -> do
@@ -95,10 +93,14 @@ loop cfg updateID = do
       let updateID' = message & tUpdateID 
       if updateID == updateID' then loop cfg updateID'
       else do
-        let echoMessage = replicate (fromIntegral $ cfg & cRepeatCount) (buildSendRequest cfg $ makeResponse cfg message)
-        -- let echoMessage = replicate 1 (buildSendRequest cfg $ makeResponse cfg message)
+        let ourAnswer = makeResponse cfg message
+	--todo: тут надо дописать обращение к базе в первом аргументе bool
+        let numberCount = bool (fromIntegral $ cfg & cRepeatCount) (1::Int) (ourAnswer & isCommand )
+        let echoMessage = replicate numberCount (buildSendRequest cfg ourAnswer)
+	
         botResponse' <- mapM httpLBS echoMessage
 	let botResponse = head botResponse' -- опасное место с функцией head. будет ли у нас всегда не пустой список здесь?
+	
         putStrLn $ "After SEnd The status code was: " ++
           show (getResponseStatusCode botResponse)
         print $ getResponseHeader "Content-Type" botResponse
