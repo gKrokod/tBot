@@ -1,6 +1,6 @@
 module Main (main) where
 import TData
-import Config (loadConfig)
+import Config (loadConfig, numberForCommand)
 import Parse (justKeyBoard)
 import qualified ConsoleBot (loop, greeting)
 import Network.HTTP.Simple --(parseRequest, Request, httpLBS, getResponseBody, getResponseStatusCode, getResponseHeader)
@@ -14,11 +14,14 @@ import qualified Data.ByteString.Lazy as L
 import Data.Function ((&))
 import Data.Bool (bool)
 import HttpMessage (buildGetRequest, buildSendRequest, buildCallBackQuery, makeResponse)
-import qualified Data.Map as Map
+import qualified Data.Map.Strict as Map
+import Data.Maybe (fromMaybe)
+import Data.Map.Internal.Debug
 
 type UserDB = Map.Map ChatID RepeatCount
 
-
+-- modifyUserDB :: UserDB -> ChatID -> UserDB
+-- modifyUserDB base user = bool (Map.insert user 3 base) (base) (Map.member user base)
 
 loop :: UserDB -> Config -> UpdateID -> IO()
 loop base cfg updateID = do
@@ -37,7 +40,7 @@ loop base cfg updateID = do
          Nothing -> do
            putStrLn "JSON is uncorrect"
            LC.putStrLn $ jsonBody
-           L.writeFile "data.json" jsonBody
+           L.writeFile "log/data.json" jsonBody
            loop base cfg updateID
 	 Just query -> do
 	   putStrLn $ show query
@@ -48,20 +51,19 @@ loop base cfg updateID = do
 	     -- putStrLn $ "Get . The status code was: " ++
 		--  show (getResponseStatusCode response)
 	     -- print $ getResponseHeader "Content-Type" response
-	     loop base (cfg {cRepeatCount = query & qDataFromButton}) updateID' -- в конфиге ставим новое значение повторов
+             let base' = Map.insert (query & qChatID) (query & qDataFromButton) base
+             -- L.writeFile "log/userDB.txt" (LC.pack (showTree base'))
+	     loop base' cfg updateID' 
 
--- Dopisat' tyt konady repeat, pochitat pro knopki i menu. K tomy ze zdes nado peredavat kolichestvo povtorov
--- добавить в параметры базу данных пользователей, из мейна давать пустой дата мап, а в программе добавлять
--- новых пользователей по айди, если не найден юзер такой.
--- loop :: UserBase -> Config -> UpdateID -> IO ()
     Just message -> do
+      let base' = bool (Map.insert (message & tChatID) (cfg & cRepeatCount) base) (base) (Map.member (message & tChatID) base)
       putStrLn $ show message
       let updateID' = message & tUpdateID 
-      if updateID == updateID' then loop base cfg updateID'
+      if updateID == updateID' then loop base' cfg updateID'
       else do
         let ourAnswer = makeResponse cfg message
-	--todo: тут надо дописать обращение к базе в первом аргументе bool
-        let numberCount = bool (fromIntegral $ cfg & cRepeatCount) (1::Int) (ourAnswer & isCommand )
+        let numberFromBase = fromMaybe (cfg & cRepeatCount) (Map.lookup (message & tChatID) base')
+        let numberCount = bool numberFromBase numberForCommand (ourAnswer & isCommand )
         let echoMessage = replicate numberCount (buildSendRequest cfg ourAnswer)
 	
         botResponse' <- mapM httpLBS echoMessage
@@ -71,8 +73,7 @@ loop base cfg updateID = do
           show (getResponseStatusCode botResponse)
         print $ getResponseHeader "Content-Type" botResponse
         LC.putStrLn $ getResponseBody botResponse
-        loop base cfg updateID'
-
+        loop base' cfg updateID'
 
 main :: IO ()
 main = do

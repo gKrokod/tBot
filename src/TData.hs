@@ -9,9 +9,9 @@ type Message = T.Text
 type ConfigKey = T.Text
 type ChatID = Integer
 type UpdateID = Integer
-type DataFromButton = Integer
+type DataFromButton = Int
 type QueryID = T.Text
-type RepeatCount = Integer
+type RepeatCount = Int
 
 data Mode = ConsoleBot | TelegramBot deriving (Show, Eq)
 

@@ -1,5 +1,5 @@
-module Config (loadConfig) where
-import TData (ConfigKey, Config (..), Mode (ConsoleBot, TelegramBot))
+module Config (loadConfig, numberForCommand) where
+import TData (ConfigKey, Config (..), Mode (ConsoleBot, TelegramBot), RepeatCount)
 import qualified Data.Configurator as C (load, lookupDefault, Worth (Required))
 import Data.Text as T (unpack, Text)
 import qualified Data.Text.Encoding as E (encodeUtf8)
@@ -9,6 +9,9 @@ lookUpConfig :: ConfigKey -> IO T.Text
 lookUpConfig key = do
   conf <- C.load [C.Required "config/bot.cfg"]
   C.lookupDefault "NotFoundInBot.cfg" conf key
+
+numberForCommand :: RepeatCount
+numberForCommand = 1
    
 loadConfig :: IO Config
 loadConfig = do

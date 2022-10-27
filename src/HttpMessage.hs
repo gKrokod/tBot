@@ -34,6 +34,7 @@ makeResponse cfg user = case user & tMessage of
   Left "/repeat" -> user {tMessage = Left $ cfg & cTextMenuRepeat, keyboardMenu = justKeyBoard, isCommand = True}
   Left msg -> user
   Right msg -> user
+
 buildCallBackQuery :: Config -> QueryID -> Request
 buildCallBackQuery cfg q =
     setRequestHost (cfg & cBotHost)
