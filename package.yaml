@@ -45,6 +45,7 @@ library:
   - text
   - configurator
   - http-conduit
+  - containers
       
 executables:
   bothttp-exe:

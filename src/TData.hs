@@ -3,6 +3,7 @@ module TData where
 import GHC.Generics
 import Data.Text as T
 import qualified Data.ByteString.Char8 as BC
+import qualified Data.Map.Strict as Map
 
 type Gif = T.Text
 type Message = T.Text
@@ -12,6 +13,7 @@ type UpdateID = Integer
 type DataFromButton = Int
 type QueryID = T.Text
 type RepeatCount = Int
+type UserDB = Map.Map ChatID RepeatCount
 
 data Mode = ConsoleBot | TelegramBot deriving (Show, Eq)
 
@@ -47,6 +49,12 @@ data Config = Config
  ,  cSecure :: Bool
  ,  cMode :: Mode
  } deriving Show
+
+data Handle = Handle 
+ {
+    hConfig :: Config
+ ,  hUserDB :: UserDB
+ }
 
 data Keyboard = Keyboard {
                   inline_keyboard :: [[Button]]	        
