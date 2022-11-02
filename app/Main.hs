@@ -1,5 +1,7 @@
 module Main (main) where
 import TData
+import qualified Base
+import qualified Handlers.Base
 import Config (loadConfig, numberForCommand)
 import Parse (justKeyBoard)
 import qualified ConsoleBot (loop, greeting)
