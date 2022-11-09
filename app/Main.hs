@@ -1,7 +1,7 @@
 module Main (main) where
 import TData
-import qualified Base
-import qualified Handlers.Base
+import qualified Base (new)-- тут реализация
+import qualified Handlers.Base (Handle (..), giveRepeatCountFromBase)-- логика тут
 import Config (loadConfig, numberForCommand)
 import Parse (justKeyBoard)
 import qualified ConsoleBot (loop, greeting)
@@ -26,32 +26,15 @@ import Data.Maybe (fromMaybe)
 main :: IO ()
 main = do
   cfg <- loadConfig
-  handle <- new cfg
-  if (handle & hConfig & cMode) == TelegramBot
-  then loop handle 0 -- if id message don't change then ask again else answer 
-  else ConsoleBot.greeting (handle & hConfig)
+  let handle = Base.new cfg
+  if (cfg & cMode) == TelegramBot
+  then loop handle cfg 0 -- if id message don't change then ask again else answer 
+  else ConsoleBot.greeting cfg 
 
 
-new :: Config -> IO Handle
-new cfg = do 
-  return Handle {
-		  hConfig = cfg
-		, hUserDB = Map.empty
-		}
-
-close :: Handle -> IO ()
-close h = return ()
-
-withHandle :: Config -> (Handle -> IO a) -> IO a
-withHandle cfg f = do
-  h <- new cfg
-  x <- f h
-  close h
-  return x
-
-loop :: Handle -> UpdateID -> IO()
-loop handle updateID = do
-  response <- httpLBS $ buildGetRequest (handle & hConfig)
+loop :: Handlers.Base.Handle IO -> Config -> UpdateID -> IO()
+loop handle cfg updateID = do
+  response <- httpLBS $ buildGetRequest (cfg)
   putStrLn $ "Get . The status code was: " <> 
        show (getResponseStatusCode response)
   print $ getResponseHeader "Content-Type" response
@@ -67,31 +50,32 @@ loop handle updateID = do
            putStrLn "JSON is uncorrect"
            LC.putStrLn $ jsonBody
            L.writeFile "log/data.json" jsonBody
-           loop handle updateID
+           loop handle cfg updateID
 	 Just query -> do
 	   putStrLn $ show query
 	   let updateID' = query & qUpdateID 
-	   if updateID == updateID' then loop handle updateID'
+	   if updateID == updateID' then loop handle cfg updateID'
 	   else do
-  	     response <- httpLBS $ buildCallBackQuery (handle & hConfig)(query & qQueryID)
+  	     response <- httpLBS $ buildCallBackQuery (cfg)(query & qQueryID)
 	     -- putStrLn $ "Get . The status code was: " ++
 		--  show (getResponseStatusCode response)
 	     -- print $ getResponseHeader "Content-Type" response
-             let base' = Map.insert (query & qChatID) (query & qDataFromButton) (handle & hUserDB)
+             -- let base' = Map.insert (query & qChatID) (query & qDataFromButton) (handle & hUserDB)
              -- L.writeFile "log/userDB.txt" (LC.pack (showTree base'))
-	     loop handle {hUserDB = base'} updateID' 
+	     loop handle cfg updateID' 
 
     Just message -> do
-      let base = handle & hUserDB
-      let base' = bool (Map.insert (message & tChatID) ((handle & hConfig) & cRepeatCount) base) (base) (Map.member (message & tChatID) base)
+      -- let base = handle & hUserDB
+      -- let base' = bool (Map.insert (message & tChatID) ((handle & hConfig) & cRepeatCount) base) (base) (Map.member (message & tChatID) base)
       putStrLn $ show message
       let updateID' = message & tUpdateID 
-      if updateID == updateID' then loop handle updateID'
+      if updateID == updateID' then loop handle cfg updateID'
       else do 
-        let ourAnswer = makeResponse (handle & hConfig) message
-        let numberFromBase = fromMaybe ((handle & hConfig) & cRepeatCount) (Map.lookup (message & tChatID) base')
-        let numberCount = bool numberFromBase numberForCommand (ourAnswer & isCommand )
-        let echoMessage = replicate numberCount (buildSendRequest (handle & hConfig ) ourAnswer)
+        let ourAnswer = makeResponse (cfg) message
+        -- let numberFromBase = fromMaybe ((handle & hConfig) & cRepeatCount) (Map.lookup (message & tChatID) base')
+        -- let numberCount = bool numberFromBase numberForCommand (ourAnswer & isCommand )
+	numberCount <- Handlers.Base.giveRepeatCountFromBase handle (message & tChatID) 
+        let echoMessage = replicate numberCount (buildSendRequest (cfg) ourAnswer)
 	
         botResponse' <- mapM httpLBS echoMessage
 	let botResponse = head botResponse' -- опасное место с функцией head. будет ли у нас всегда не пустой список здесь?
@@ -100,5 +84,5 @@ loop handle updateID = do
           show (getResponseStatusCode botResponse)
         print $ getResponseHeader "Content-Type" botResponse
         LC.putStrLn $ getResponseBody botResponse
-        loop handle {hUserDB = base'} updateID' 
+        loop handle cfg updateID' 
 

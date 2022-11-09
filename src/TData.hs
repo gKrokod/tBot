@@ -17,11 +17,11 @@ type RepeatCount = Int
 
 type UserDB = Map.Map ChatID RepeatCount
 
-data Handle = Handle 
- {
-    hConfig :: Config
- ,  hUserDB :: UserDB
- }
+-- data Handle = Handle 
+--  {
+--     hConfig :: Config
+--  ,  hUserDB :: UserDB
+--  }
 
 data Mode = ConsoleBot | TelegramBot deriving (Show, Eq)
 
