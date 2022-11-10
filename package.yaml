@@ -46,6 +46,7 @@ library:
   - configurator
   - http-conduit
   - containers
+  - mtl
       
 executables:
   bothttp-exe:
@@ -62,6 +63,7 @@ executables:
     # - text
     - http-conduit
     - containers
+    - mtl
 
 tests:
   bothttp-test:

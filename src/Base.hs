@@ -6,6 +6,7 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Bool (bool)
 import Data.Function ((&))
+import Control.Monad.State
 
 -- data Handle m = Handle 
 --   {  findUser :: ChatID -> m (Maybe User)
@@ -30,11 +31,11 @@ import Data.Function ((&))
 --         base = h & Handler.userDB
 -- 	userIsMember = Map.member user base
 
-new :: Config -> Handler.Handle IO 
+new :: Config -> Handler.Handle (State (UserDB))
 new cfg = Handler.Handle {
-                           Handler.defaultRepeatCount = cfg & cRepeatCount  -- e.g. 10
-			 , Handler.findUser = \_ -> pure $ Just $ cfg & cRepeatCount
-			 , Handler.updateUser = \_ _ -> pure ()
+                           Handler.defaultRepeatCount = undefined-- cfg & cRepeatCount  -- e.g. 10
+			 , Handler.findUser = undefined -- \_ -> pure $ Just $ cfg & cRepeatCount
+			 , Handler.updateUser = undefined -- \_ _ -> pure ()
 			 }
 
 close :: Handler.Handle IO -> ()
