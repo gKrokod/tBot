@@ -13,9 +13,9 @@ type UpdateID = Integer
 type DataFromButton = Int
 type QueryID = T.Text
 type RepeatCount = Int
--- type UserDB = Map.Map ChatID RepeatCount
 
 type UserDB = Map.Map ChatID RepeatCount
+-- newtype UserDataBase = UserDataBase (MVar UserDB)
 
 -- data Handle = Handle 
 --  {
@@ -58,11 +58,6 @@ data Config = Config
  ,  cMode :: Mode
  } deriving Show
 
--- data Handle = Handle 
---  {
---     hConfig :: Config
---  ,  hUserDB :: UserDB
---  }
 
 data Keyboard = Keyboard {
                   inline_keyboard :: [[Button]]	        
